@@ -6,12 +6,12 @@ if len(list(sys.argv)) > 1 :
 	maxDate = time.strptime(sys.argv[1],"%Y-%m-%d")
 else :
 	maxDate = time.strptime("2002-12-31", "%Y-%m-%d")
-path = 'training_set'
+path = '../training_set/'
 i = 0
 nReviews = 0
 nMovies = 0
 setReviewers = set()
-nameDir = 'subtraining_'+'-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)])
+nameDir = '../subtraining_'+'-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)])
 maxDateStr = nameDir.split('_')[-1]
 if not(os.path.exists(nameDir)):
 	os.mkdir(nameDir)
@@ -32,24 +32,18 @@ def isDateGreater(str1,str2):
 		
 if __name__ == "__main__" :
 	for filename in os.listdir(path+'/') :
-		#~ i += 1
-		#~ if i % 100 == 0 :
-			#~ print(i)
 		fin = open('/'.join([path,filename]),'r')
 		fin.readline()
+		if not os.path.isdir('../nameDir') :
+			os.mkdir('../nameDir')
 		res = ""
 		for line in fin :
 			nReviews += 1
 			parsed = line.split(',')
 			setReviewers.add(parsed[0])
 			currDateStr = parsed[-1].replace('\r','').replace('\n','')
-			#~ currDate = time.strptime(currDateStr,"%Y-%m-%d") 
-			#~ print("here :")
-			#~ print(currDate.tm_year)
 			if isDateGreater(maxDateStr,currDateStr):
 				res += line
-			#~ except :
-				#~ None
 		nMovies += 1
 		if res != "":
 			fout = open(nameDir+'/'+filename,'w')
