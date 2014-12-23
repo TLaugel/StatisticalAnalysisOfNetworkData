@@ -34,8 +34,6 @@ if __name__ == "__main__" :
 	for filename in os.listdir(path+'/') :
 		fin = open('/'.join([path,filename]),'r')
 		fin.readline()
-		if not os.path.isdir('../nameDir') :
-			os.mkdir('../nameDir')
 		res = ""
 		for line in fin :
 			nReviews += 1
