@@ -8,7 +8,7 @@ if len(list(sys.argv)) > 1 :
 else :
   maxDate = time.strptime("2002-12-31", "%Y-%m-%d")
 
-
+#to adapt
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/' #file where will be the output .txt : must be in a different file than the input .txt that we created with first python script
 nameDir = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/subtraining_'+'-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)])  #file where the .txt files that we created with first script are
 
