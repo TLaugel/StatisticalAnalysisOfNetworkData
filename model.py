@@ -1,12 +1,27 @@
+import os
+import time
+import sys
+import gzip
+import sys
+#maxdate of the previous file
+if len(list(sys.argv)) > 1 :
+  maxDate = time.strptime(sys.argv[1],"%Y-%m-%d")
+else :
+  maxDate = time.strptime("2002-12-31", "%Y-%m-%d")
+maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
 import pandas, numpy
 
 ###Create database
-fin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/database2002-12-31.txt' #csv output file of last python script
-df = pandas.read_csv(fin,sep=",",encoding="utf8")
+path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
+if sys.platform == 'linux2':
+	path = '../'
+fin = path+'database_'+maxDateStr+'.txt.gz' #csv output file of last python script
+
+df = pandas.read_csv(fin,sep=",",encoding="utf8",compression = 'gzip')
 #print(df.shape)
 nbMovies = len(pandas.Series(df["movieID"].values.ravel()).unique())
 nbUsers = len(pandas.Series(df["userID"].values.ravel()).unique())
-#print nbMovies, nbUsers
+print nbMovies, nbUsers
 
 
 
