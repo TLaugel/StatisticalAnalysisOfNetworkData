@@ -73,48 +73,26 @@ r = pandas.DataFrame(r.items(), columns=['userID', 'rbar'])
 
 #rhat definition
 df = pandas.merge(df, r, left_on='userID', right_on='userID', how='left') 
-df['centeredRating'] = min(max(df['rating'] - df['rbar'],-1*B),B) #(centered rating or rhat)
-# last line does not work : problem with taking the min of a serie
+
+a = df['rating'] - df['rbar']
+a = a.tolist()
+b = []
+for x in a:
+    z = max(x,-B)
+    z = min(z, B)
+    b.append(z)
+df['centeredRating'] = b
 
 
-
-###### Ici, sortir un csv avec nouveau dataframe ou trouver moyen plus propre d'écrire la boucle sale (prend du temps (autour de 5min))
-
-
-"""
-#####Covariance Matrix : not finished
-weight = 1/sum(UCnt) #vector containing one weight for each user
-
-#intialize matrices
-Cov = numpy.zeros((nbMovies, nbMovies)) 
-Wgt = Cov
-
-#generate noise matrix
-NoiseCov = numpy.zeros((nbMovies, nbMovies))  #noise matrix
-NoiseWgt = NoiseCov
-
-#vector rbar for each user = centeredreco for each movie, for 
-for user in pandas.Series(df["userID"].values.ravel()).unique():
-    rbarSerie = df["centeredRating"][df["userID"] == user]
-    rbarSerie = rbarSerie.tolist() #tf en matrix pr multiplica matricielle?
-    #rbarMatrix = weight[user] * rbar * transpose(rbar) > matrix size d*d
-
-    #computer vecteur de 1 et 0 si un utilisateur a recommendé un film:
-        moviesSerie = df["movieID"][df["userID"] == user] #serie des films que l'user a regardé
-        #creer liste de 0 de taille nbMovies, et remplacer par moviesSerie les valeurs avec les index correspondants
-        #puis 1 si >0, 0 sinon. = vecteur binaire de Moviesvec
-    #euMatrix = weight[user] * Moviesvec * transpose(Moviesvec) > matrixe size d*d
-    
-    Cov = Cov + rbarMatrix
-    Wgt = Wgt + euMatrix
-Cov = Cov + NoiseCov
-Wgt = Wgt + NoiseWgt
-
-#ici on va extraire les matrices (deux fichiers txt, ou un seul séparé par un truc)
+###Export database with rhat : 
+path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
+fout = path+'dbEffects'+maxDate+'.txt'
+df.to_csv(fout, sep='\t', encoding='utf-8')
 
 
-##################################
-#Fonctions à creer
-##################################
-# eu =vecteur binaire pour chaque user, chaque coordonnée étant un film. 1 si le user a review le film, 0 sinon
-"""
+#######TODO : 
+#	add generic path for output file
+#	better way to do these calculations instead of these dirty loops
+
+
+#export mtnt car prend du temps à computer (etw. 9min)
