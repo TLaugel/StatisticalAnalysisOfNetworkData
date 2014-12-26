@@ -65,7 +65,7 @@ Wgt = Wgt + NoiseWgt
 
 
 ###Cleaning the covariance matrix
-beta = 0
+beta = 0  # NB :  the paper states that they used different values of beta for the diagonal and for the rest> to consider
 Cov = Cov + beta * Cov.mean()
 Wgt = Wgt + beta * Wgt.mean()
 Cov = Cov./Wgt #division term by term
