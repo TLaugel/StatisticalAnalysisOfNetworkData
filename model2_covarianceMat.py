@@ -68,7 +68,7 @@ Wgt = Wgt + NoiseWgt
 beta = 0  # NB :  the paper states that they used different values of beta for the diagonal and for the rest> to consider
 Cov = Cov + beta * Cov.mean()
 Wgt = Wgt + beta * Wgt.mean()
-Cov = Cov./Wgt #division term by term
+Cov = np.divide(Cov,Wgt) #division term by term
 
 ###Ouput files : we save each matrix in a separate txt file
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
