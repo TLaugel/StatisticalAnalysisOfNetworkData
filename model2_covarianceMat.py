@@ -64,10 +64,16 @@ Cov = Cov + NoiseCov
 Wgt = Wgt + NoiseWgt
 
 
+###Cleaning the covariance matrix
+beta = 0
+Cov = Cov + beta * Cov.mean()
+Wgt = Wgt + beta * Wgt.mean()
+Cov = Cov./Wgt #division term by term
+
 ###Ouput files : we save each matrix in a separate txt file
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 foutCov = path+'CovMatrix'+maxDate+'.txt'
-foutWgt = path+'WgtMatrix'+maxDate+'.txt'
+#foutWgt = path+'WgtMatrix'+maxDate+'.txt'
 
 numpy.savetxt(foutCov,Cov,delimiter=',')
-numpy.savetxt(foutWgt,Wgt,delimiter=',')
+#numpy.savetxt(foutWgt,Wgt,delimiter=',')
