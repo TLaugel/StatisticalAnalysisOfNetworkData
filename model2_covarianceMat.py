@@ -2,10 +2,13 @@
 # model part 2: computation of covariance and weight matrices
 #########################
 
+import numpy, pandas
+
 #input is the output dataframe of the script model.py 
 fin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/dbEffects2002-12-31.txt'
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
 
+nbMovies = len(pandas.Series(df["movieID"].values.ravel()).unique())
 UCnt = df.groupby('userID').agg(['count'])["rating"] #how many movies each user
 UCnt = UCnt.ix[:,0]
 
