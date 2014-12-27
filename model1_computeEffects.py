@@ -20,8 +20,10 @@ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 if sys.platform == 'linux2':
 	path = '../'
 fin = path+'database_'+maxDateStr+'.txt.gz' #csv output file of last python script
+#~ fin = path+'test'+'.txt.gz' #csv output file of last python script
 
 df = pandas.read_csv(fin,sep=",",encoding="utf8",compression = 'gzip')
+df['num'] = 1
 #print(df.shape)
 nbMovies = len(pandas.Series(df["movieID"].values.ravel()).unique())
 nbUsers = len(pandas.Series(df["userID"].values.ravel()).unique())
@@ -41,8 +43,6 @@ GSum = sum(df["rating"]) + noise
 GCnt = df.shape[0] + noise
 G = GSum/GCnt
 
-
-
 #####Movie effects
 noisemovies = [0]*nbMovies #Generate vectors of noise for each movie
 betam = 0 #number of fictitious ratings to introduce in the movie average calculation
@@ -52,53 +52,43 @@ MCnt = df.groupby('movieID').agg(['count'])["rating"] #agg() creates a dataframe
 MCnt = MCnt.ix[:,0] + noisemovies
 Mavg = (MSum + betam*G)/(MCnt + betam)
 
-
+Mavg = pandas.DataFrame(Mavg , columns = ['AvgMovie'] )
+Mavg.reset_index(inplace = True)
+Mavg.set_index(['movieID'])
+del MCnt,MSum
 
 #####User effects    
 betap = 0 #number of fictitious ratings to introduce in the user average calculation
-B = 0 #bound of the interval that clam the resulted centered rating, to limit sensitivity 
+B = 1 #bound of the interval that clam the resulted centered rating, to limit sensitivity 
 # (???)
 
 UCnt = df.groupby('userID').agg(['count'])["rating"] #how many movies each user
 UCnt = UCnt.ix[:,0]
-r = {}
 
+print 'here we go '+strftime("%Y %m %d %H:%M:%S", gmtime())	
+df = pandas.merge(df,Mavg,left_on='movieID', right_on='movieID', how='left')
+df['ratingCorrected'] = df["rating"] - df['AvgMovie']
+r = df.groupby('userID').sum()[["ratingCorrected","num"]]
+r['rbar'] = (r['ratingCorrected']+betap*G)/(r["num"] + betap)
 
-print 'here we go'+strftime("%Y %m %d %H:%M:%S", gmtime())
-for user in pandas.Series(df["userID"].values.ravel()).unique():
-    moviesSerie = df["movieID"][df["userID"] == user]
-    ratingsSerie = df["rating"][df["userID"] == user]
-    MavgUser = []#pandas.Series([])
-    for movie in moviesSerie:
-        MavgUser.append(Mavg[movie])
-    ratingsSerie = ratingsSerie.tolist()
-    centeredRating = sum([x - y for x, y in zip(ratingsSerie, MavgUser)])
-    r[user] = (centeredRating + betap*G)/(UCnt[user] + betap)
-print 'le plus dur est fait now'+strftime("%Y %m %d %H:%M:%S", gmtime())
-r = pandas.DataFrame(r.items(), columns=['userID', 'rbar'])
-
+print 'le plus dur est fait now '+strftime("%Y %m %d %H:%M:%S", gmtime())
 #rhat definition
-df = pandas.merge(df, r, left_on='userID', right_on='userID', how='left') 
+df.drop('num', axis=1, inplace=True)
+df = pandas.merge(df, r, left_on='userID', right_on=r.index, how='left') 
 
-a = df['rating'] - df['rbar']
-a = a.tolist()
-b = []
-for x in a:
-    z = max(x,-B)
-    z = min(z, B)
-    b.append(z)
-df['centeredRating'] = b #why z == 0 for all line in df ?
-
+df['centeredRating'] = df['rating'] - df['rbar']
+df['centeredRating'] [df['centeredRating']  > B] = B
+df['centeredRating'] [df['centeredRating']  < -B] = -B
 
 ###Export database with rhat : 
-#~ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
+print "Export the data "+strftime("%Y %m %d %H:%M:%S", gmtime())
 fout = path+'dbEffects'+maxDateStr+'.txt'
 df.to_csv(fout, sep='\t', encoding='utf-8')
-
+print "Ended at "+strftime("%Y %m %d %H:%M:%S", gmtime())
 
 #######TODO : 
-#	add generic path for output file
-#	better way to do these calculations instead of these dirty loops
+#	add generic path for output file : done
+#	better way to do these calculations instead of these dirty loops : done
 
 
 #export mtnt car prend du temps a computer (etw. 9min)
