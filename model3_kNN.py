@@ -28,34 +28,47 @@ Covin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/CovMatrix
 Cov = numpy.loadtxt(Covin, delimiter = ',')
 fin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/dbEffects2002-12-31.txt'
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
-listMovies = df.groupby('movieID')['movieID'].max().tolist()
 ftest = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/probe.txt'
 testset = open(ftest,'r')
 testset.readline()
-testingSet = []
+testingSet = {}
 for line in testset:
-    if ':' not in line:
-        testingSet.append(int(line.replace('\n','')))
+    if ':' in line:
+        movie = int(line.split(':')[0])
+        testingSet[movie] = []
+    else:
+        user = int(line.replace('\n',''))
+        testingSet[movie].append(user)
+#dic :{movie1:[user1,user2..]}        
+
+
+listMovies = df.groupby('movieID')['movieID'].max().tolist()
+listUsers = df.groupby('userID')['userID'].max().tolist()
+
 
 
 ### kNN algorithm from covariance matrix
 
-def getNeighbors(movietest, k): #k nearest neighbors
-    similarities = [] #list of tuples with (movies,similarity with movie) 
-    for movie2 in listMovies:
-        if (movie2 != movietest and movietest in listMovies):
+def getNeighbors(moviesviewed, movietest, k): #k nearest neighbors among the movies that the user has already seen
+    similarities = [] #list of tuples with (movies,similarity with movie)
+    for movie2 in moviesviewed: #moviestrain is the list of movieIDs that the current user has viewed
+        if (movie2 != movietest and movietest in listMovies): #listmovies is the list of movies in the covariance matrix: has to be in it
             similarities.append((movie2, Cov[listMovies.index(movietest),listMovies.index(movie2)]))
     similarities.sort(key=operator.itemgetter(1), reverse=True)
     neighbors = []
     for x in range(k):
         neighbors.append(similarities[x][0])
-    return neighbors #list of k movieID
+    return neighbors
 
-def getRating(neighbors): #we have a list of similar movies, now we have to derive the rating
+def getRating(userviewed, neighbors): #we have a list of similar movies, now we have to derive the rating
     #option 1 : majority vote
     classVotes = {}
     for x in range(len(neighbors)):
-        rating = neighbors[x][1]
+        neighbor = neighbors[x] #scalar, it is the movieID of the neighbor
+         #on a une liste de films proches, mais quel rating attribue-t-on à ce film?
+                #1. majorité/moyenne des ratings (bad but ez)
+                #2. 
+        rating = float(userviewed.ix[:,1][userviewed.ix[:,0]==neighbor]) #scalar
         if rating in classVotes:
             classeVotes[rating] +=1
         else:
@@ -88,12 +101,29 @@ def accuracymeasures(predictions, targets): #compute RMSE and % of well-predicte
 def kNN(k):
     predictions = []
     for movie in testingSet:
-        if movie in listMovies:
-            neighbors = getNeighbors(movie, k)
-            result = getRating(neighbors)
-        else:
-            result = 'NA'
-        predictions.append(result)
+        userlist = testingSet[movie]
+        for user in userlist:
+            if user in listUsers:
+                userviewed = df[df['userID']==user][['movieID','rating']]
+                moviesviewed = userviewed['movieID'].tolist()
+            else :
+                userviewed = df.groupby('movieID')[['movieID', 'rating']].agg(['mean'])
+                userviewed = numpy.round(userviewed) #we want integer values
+                moviesviewed = userviewed['movieID']['mean'].tolist()
+                break
+            if movie in listMovies: #movie we want to get the neighbors of has to be in the cov matrix
+                neighbors = getNeighbors(moviesviewed, movie, k) #list of closest movies he has viewed
+                result = getRating(userviewed, neighbors)  #rating value
+            else:
+                result = 'NA'
+            predictions.append(result)
+            break
+        
     accuracymeasures(predictions,testingSet)
     
 print kNN(1)
+
+
+################
+# TODO : testing set à enlever du train
+# what if k>number of movies viewed (compléter avec des génériques..)
