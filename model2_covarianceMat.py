@@ -48,11 +48,11 @@ moviesall = df.groupby('movieID')[['movieID']].max()
 
 ###Matrices and Noise matrices initialization
 Cov = numpy.asmatrix( numpy.zeros((nbMovies, nbMovies))) 
-Wgt = Cov
+Wgt = Cov.copy()
 NoiseCov = numpy.asmatrix( numpy.zeros((nbMovies, nbMovies)))  #noise matrix
 NoiseWgt = NoiseCov
 
-
+print "I am here"
 ###loop on users: for each user, we compute its corresponding Cov and Wgt matrices and aggregate them to the others
 for user in pandas.Series(df["userID"].values.ravel()).unique():
     rbarMatrix = rbarSerie(user) #matrix of size nbMovies^2 #weight[user] * rbar.T * rbar # matrix size nbMovies^2
