@@ -10,15 +10,18 @@ import gzip
 import sys
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
-  maxDate = time.strptime(sys.argv[1],"%Y-%m-%d")
+  maxDate = sys.argv[1]
 else :
-  maxDate = time.strptime("2002-12-31", "%Y-%m-%d")
-maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
-
-maxDate = "2002-12-31"
+  maxDate = "2002-12-31"
 
 
 
+####input is the output dataframe of the script model.py 
+path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
+if sys.platform == 'linux2':
+	path = '../'
+fin = path+'dbEffects'+maxDate+'.txt'
+df = pandas.read_csv(fin,sep="\t",encoding="utf8")
 
 ###functions
 
@@ -34,9 +37,6 @@ def rbarSerie(user):
 def onezeromat(matrix):
     return numpy.asmatrix(numpy.where(matrix>0, 1, 0)) 
 
-####input is the output dataframe of the script model.py 
-fin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/dbEffects2002-12-31.txt'
-df = pandas.read_csv(fin,sep="\t",encoding="utf8")
 
 
 ####Parameters
@@ -71,9 +71,8 @@ Wgt = Wgt + beta * Wgt.mean()
 Cov = numpy.divide(Cov,Wgt) #division term by term
 
 ###Ouput files : we save each matrix in a separate txt file
-path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
+#~ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 foutCov = path+'CovMatrix'+maxDate+'.txt'
 #foutWgt = path+'WgtMatrix'+maxDate+'.txt'
-
 numpy.savetxt(foutCov,Cov,delimiter=',')
 #numpy.savetxt(foutWgt,Wgt,delimiter=',')

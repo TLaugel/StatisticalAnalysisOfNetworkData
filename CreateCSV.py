@@ -4,18 +4,20 @@ import sys
 import gzip
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
-  maxDate = time.strptime(sys.argv[1],"%Y-%m-%d")
+  maxDateStr = sys.argv[1]
 else :
-  maxDate = time.strptime("2002-12-31", "%Y-%m-%d")
-maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
-
+  maxDateStr = "2002-12-31"
+  
+#~ maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
+print maxDateStr
 #to adapt
-path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/' #file where will be the output .txt : must be in a different file than the input .txt that we created with first python script
-nameDir = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/subtraining_'+'-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)])  #file where the .txt files that we created with first script are
+path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download' #file where will be the output .txt : must be in a different file than the input .txt that we created with first python script
+#nameDir = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/subtraining_'+'-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)])  #file where the .txt files that we created with first script are
 
 if sys.platform == 'linux2':
 	path = '..'
-	nameDir = '../subtraining_'+maxDateStr
+
+nameDir = path+'/subtraining_'+maxDateStr
 	
 if __name__ == "__main__" :
     fout = gzip.open(path+'/database_'+maxDateStr+'.txt.gz','w')

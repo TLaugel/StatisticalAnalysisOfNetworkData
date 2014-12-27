@@ -3,12 +3,16 @@ import time
 import sys
 import gzip
 import sys
+from time import gmtime, strftime
+print("starting at "+strftime("%Y %m %d %H:%M:%S", gmtime()))
+
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
-  maxDate = time.strptime(sys.argv[1],"%Y-%m-%d")
+  maxDateStr = sys.argv[1]
 else :
-  maxDate = time.strptime("2002-12-31", "%Y-%m-%d")
-maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
+  maxDateStr = "2002-12-31"
+  
+#~ maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
 import pandas, numpy
 
 ###Create database
@@ -21,7 +25,7 @@ df = pandas.read_csv(fin,sep=",",encoding="utf8",compression = 'gzip')
 #print(df.shape)
 nbMovies = len(pandas.Series(df["movieID"].values.ravel()).unique())
 nbUsers = len(pandas.Series(df["userID"].values.ravel()).unique())
-print nbMovies, nbUsers
+print "There is %d movies and %d users before %s"% (nbMovies, nbUsers,maxDateStr)
 
 
 
@@ -58,7 +62,9 @@ B = 0 #bound of the interval that clam the resulted centered rating, to limit se
 UCnt = df.groupby('userID').agg(['count'])["rating"] #how many movies each user
 UCnt = UCnt.ix[:,0]
 r = {}
-print 'here we go'
+
+
+print 'here we go'+strftime("%Y %m %d %H:%M:%S", gmtime())
 for user in pandas.Series(df["userID"].values.ravel()).unique():
     moviesSerie = df["movieID"][df["userID"] == user]
     ratingsSerie = df["rating"][df["userID"] == user]
@@ -68,7 +74,7 @@ for user in pandas.Series(df["userID"].values.ravel()).unique():
     ratingsSerie = ratingsSerie.tolist()
     centeredRating = sum([x - y for x, y in zip(ratingsSerie, MavgUser)])
     r[user] = (centeredRating + betap*G)/(UCnt[user] + betap)
-print 'le plus dur est fait now'
+print 'le plus dur est fait now'+strftime("%Y %m %d %H:%M:%S", gmtime())
 r = pandas.DataFrame(r.items(), columns=['userID', 'rbar'])
 
 #rhat definition
@@ -81,12 +87,12 @@ for x in a:
     z = max(x,-B)
     z = min(z, B)
     b.append(z)
-df['centeredRating'] = b
+df['centeredRating'] = b #why z == 0 for all line in df ?
 
 
 ###Export database with rhat : 
-path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
-fout = path+'dbEffects'+maxDate+'.txt'
+#~ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
+fout = path+'dbEffects'+maxDateStr+'.txt'
 df.to_csv(fout, sep='\t', encoding='utf-8')
 
 
@@ -95,4 +101,4 @@ df.to_csv(fout, sep='\t', encoding='utf-8')
 #	better way to do these calculations instead of these dirty loops
 
 
-#export mtnt car prend du temps à computer (etw. 9min)
+#export mtnt car prend du temps a computer (etw. 9min)
