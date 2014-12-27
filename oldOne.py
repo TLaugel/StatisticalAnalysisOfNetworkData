@@ -18,6 +18,7 @@ if sys.platform == 'linux2':
 	path = '../'
 fin = path+'database_'+maxDateStr+'.txt.gz' #csv output file of last python script
 df = pandas.read_csv(fin,sep=",",encoding="utf8",compression = 'gzip')
+print df.shape
 #print(df.shape)
 nbMovies = len(pandas.Series(df["movieID"].values.ravel()).unique())
 nbUsers = len(pandas.Series(df["userID"].values.ravel()).unique())
@@ -70,7 +71,7 @@ df['centeredRating'] = b
 print df.shape
 ###Export database with rhat :
 #~ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
-fout = path+'dbEffects'+maxDate+'_ref.txt'
+fout = path+'dbEffects'+maxDateStr+'_ref.txt'
 df.to_csv(fout, sep='\t', encoding='utf-8')
 #######TODO :
 # add generic path for output file

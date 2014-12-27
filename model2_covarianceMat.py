@@ -24,18 +24,24 @@ fin = path+'dbEffects'+maxDate+'.txt'
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
 
 ###functions
-
+#~ from scipy.sparse import csc_matrix as sparseM
 #rbarSerie : for a user, creates the matrix of size nbMovies^2 with M[i,j]=weight_user*rbar_user[i]*rbar_user[j]
 def rbarSerie(user):
-    M = df[["movieID", "centeredRating"]][df["userID"] == user] #je prends films id et rating centered pour mon user
+    M = df.loc[df.index == user,["movieID", "centeredRating"]] #je prends films id et rating centered pour mon user /!\ df doit etre indexee seulement selon userID
     M = pandas.merge(moviesall,M, left_on='movieID', right_on='movieID', how='left') #left join on list of unique movies
+    #~ print M.shape
     M = M["centeredRating"].fillna(0) #replace NaN from the left join by zeros and keep only centeredRating : this is now a Serie of size nbMovies
-    M = numpy.asmatrix(M.as_matrix()) #convert to an array then a matrix to get the transpose(not working for a 1 dimension vector with array format)
-    Mat = weight[user] * M.T * M
-    return M
+    #~ M = M["centeredRating"].to_sparse(fill_value=0) #replace NaN from the left join by zeros and keep only centeredRating : this is now a Serie of size nbMovies
+    #~ M = M.as_matrix()#convert to an array then a matrix to get the transpose(not working for a 1 dimension vector with array format)
+    M = numpy.asmatrix(M.as_matrix())#convert to an array then a matrix to get the transpose(not working for a 1 dimension vector with array format)
+    #~ M = sparseM(M)
+    #~ print M.size
+    Mat = weight[user] * M.dot(M.transpose()) #I think it was M*M.T in the paper.
+    return Mat #why don't you return Mat (it was M before, I assume it was a mistake)
 
 def onezeromat(matrix):
     return numpy.asmatrix(numpy.where(matrix>0, 1, 0)) 
+
 
 
 
@@ -52,16 +58,30 @@ Wgt = Cov.copy()
 NoiseCov = numpy.asmatrix( numpy.zeros((nbMovies, nbMovies)))  #noise matrix
 NoiseWgt = NoiseCov
 
+M = df[["movieID", "centeredRating"]].copy()
+M = pandas.merge(moviesall,M, left_on='movieID', right_on='movieID', how='left') 
+
+
 print "I am here"
 ###loop on users: for each user, we compute its corresponding Cov and Wgt matrices and aggregate them to the others
+i = 0
+import datetime
+import time
+timestart =  time.time()
+df.set_index(['userID']) #small improvment : a bit faster...
 for user in pandas.Series(df["userID"].values.ravel()).unique():
-    rbarMatrix = rbarSerie(user) #matrix of size nbMovies^2 #weight[user] * rbar.T * rbar # matrix size nbMovies^2
-    euMatrix = onezeromat(rbarMatrix) #idem with 1 instead of the ratings #weight[user] * eu.T * eu #idem
-    Cov = Cov + rbarMatrix #let's sum baby
-    Wgt = Wgt + euMatrix
-
+	rbarMatrix = rbarSerie(user) #matrix of size nbMovies^2 #weight[user] * rbar.T * rbar # matrix size nbMovies^2
+	euMatrix = onezeromat(rbarMatrix) #idem with 1 instead of the ratings #weight[user] * eu.T * eu #idem
+	Cov = Cov + rbarMatrix #let's sum baby
+	Wgt = Wgt + euMatrix
+	#~ print "tut"
+	if i > 100 :
+		break
+	i+=1
+	
+print  time.time()-timestart
 Cov = Cov + NoiseCov
-Wgt = Wgt + NoiseWgt
+#~ Wgt = Wgt + NoiseWgt
 
 
 ###Cleaning the covariance matrix
