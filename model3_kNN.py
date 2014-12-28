@@ -15,20 +15,27 @@ import operator
 
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
-  maxDate = time.strptime(sys.argv[1],"%Y-%m-%d")
+  maxDate = sys.argv[1]
 else :
-  maxDate = time.strptime("2002-12-31", "%Y-%m-%d")
+  maxDate ="2002-12-31"
+
 maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
 
-maxDate = "2001-12-31"
+#~ maxDate = "2001-12-31"
 
 
 ###Input files : covariance matrix, list of movies, test data
-Covin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/CovMatrix2001-12-31.txt'
+path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
+if sys.platform == 'linux2':
+	path = '../'
+
+Covin = path+'CovMatrix_'+maxDate+'.txt'
 Cov = numpy.loadtxt(Covin, delimiter = ',')
-fin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/dbEffects2002-12-31.txt'
+
+fin = path+'dbEffects'+maxDate+'.txt'
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
-ftest = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/probe.txt'
+
+ftest = path+'probe.txt'
 testset = open(ftest,'r')
 testset.readline()
 testingSet = {}

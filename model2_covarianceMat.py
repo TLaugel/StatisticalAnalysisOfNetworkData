@@ -30,7 +30,7 @@ df.drop(VarDel, axis=1, inplace=True)
 from scipy.sparse import csc_matrix as sparseM
 #rbarSerie : for a user, creates the matrix of size nbMovies^2 with M[i,j]=weight_user*rbar_user[i]*rbar_user[j]
 def rbarSerie(user):
-    M = df.loc[df['userID']==user,["movieID", "centeredRating"]] #je prends films id et rating centered pour mon user /!\ df doit etre indexee seulement selon userID
+    M = df.loc[df.index==user,["movieID", "centeredRating"]] #je prends films id et rating centered pour mon user /!\ df doit etre indexee seulement selon userID
     M = pandas.merge(moviesall,M, left_on='movieID', right_on='movieID', how='left') #left join on list of unique movies
     #~ print M.shape
     M = M["centeredRating"].fillna(0) #replace NaN from the left join by zeros and keep only centeredRating : this is now a Serie of size nbMovies
@@ -70,15 +70,15 @@ i = 0
 import datetime
 import time
 timestart =  time.time()
-df.set_index(['userID']) #small improvment : a bit faster...
-for user in pandas.Series(df["userID"].values.ravel()).unique():
+df.set_index(['userID'], inplace = True) #small improvment : a bit faster...
+for user in pandas.Series(df.index.values.ravel()).unique():
 	rbarMatrix = rbarSerie(user) #matrix of size nbMovies^2 #weight[user] * rbar.T * rbar # matrix size nbMovies^2
 	#~ euMatrix = onezeromat(rbarMatrix.todense()) #idem with 1 instead of the ratings #weight[user] * eu.T * eu #idem
 	Cov += rbarMatrix.todense() #let's sum baby
 	Wgt += numpy.greater(rbarMatrix.todense(),0) #j'avais fait une connerie ici...
-	i += 1
-	if i > 1 :
-		break
+	#~ i += 1
+	#~ if i > 1 :
+		#~ break
 print  time.time()-timestart 
 
 
