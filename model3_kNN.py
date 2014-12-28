@@ -19,35 +19,26 @@ import operator
 if len(list(sys.argv)) > 1 :
   maxDate = sys.argv[1]
 else :
-  maxDate ="2002-12-31"
-
-maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
-
-#~ maxDate = "2000-12-31"
+  maxDate ="2000-12-31"
 
 
 ###Input files : covariance matrix, list of movies, test data
 print timestart
 
-Covin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/CovMatrix_2000-12-31.txt'
+path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
+if sys.platform == 'linux2':
+	path = '../'
+Covin = path+'CovMatrix_'+maxDate+'txt'
 Cov = numpy.loadtxt(Covin, delimiter = ',')
 print 'time to import Cov: '+ str((time.time()-timestart)/60)
-fin = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/dbEffects2000-12-31.txt'
+fin = path+'dbEffects'+date+'.txt'
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
-ftest = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/database_2001-06-01_Test.txt'
+ftest = path+'database_'+date+'_Test.txt'
 dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8")
 dfTest = dfTest.head(100)
-
-
 print 'time to import Cov + Train and Test dataframes: '+ str((time.time()-timestart)/60)
 
 print 'hey ho let s go'
-
-
-
-
-
-
 ### kNN algorithm from covariance matrix
 listMovies = df.groupby('movieID')['movieID'].max().tolist()
 listUsers = df.groupby('userID')['userID'].max().tolist()

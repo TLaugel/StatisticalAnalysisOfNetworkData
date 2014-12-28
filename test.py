@@ -1,5 +1,5 @@
 import os
-path = '../training_set'
+path = '../testing_2001-03-31'
 i = 0
 '-'.join(['a', 'b', 'c'])
 nReviews = 0
