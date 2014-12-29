@@ -37,7 +37,8 @@ print 'time to import Cov: '+ str((time.time()-timestart)/60)
 
 fin = path+'dbEffects'+maxDate+'.txt'
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
-ftest = path+'testUsed_'+maxDate+'.txt.gz'
+ftest = path+'database_'+maxDate+'_Test.txt.gz'
+#~ ftest = path+'testUsed_'+maxDate+'.txt.gz'
 #~ ftest = path+'test'
 dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8",compression = 'gzip')
 #~ print dfTest.shape
@@ -84,7 +85,12 @@ def getRating(userviewed, neighbors): #we have a list of similar movies, now we 
             classVotes[rating] += 1
         else:
             classVotes[rating] = 1
-    return max(classVotes.iteritems(),key=operator.itemgetter(1))[0] #if I understand correctly you don't have to sort, you just take the max
+        res = 0
+        try : #not perfect but I don t see why it is needed...
+            res = max(classVotes.iteritems(),key=operator.itemgetter(1))[0] #if I understand correctly you don't have to sort, you just take the max
+        except :
+            res = 3
+        return res
 
 def accuracymeasures(predictions, dataTest):
     #1 remove NA and corresponding lines in dataTest

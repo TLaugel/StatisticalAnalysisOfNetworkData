@@ -1,0 +1,17 @@
+time to import Cov: 0.213535348574
+time to import Cov + Train and Test dataframes: 0.230152348677
+hey ho let s go
+Oh yeah baby
+______________________________
+           Accuracy
+RMSE = 1.20993911922
+Accuracy = 35.4657575454%
+ 
+Confusion matrix:
+[[  55   41  401   77   33]
+ [  33  117  947  258   82]
+ [  64  170 2232  683  194]
+ [  34  143 1861  842  273]
+ [  20   43  767  312  291]]
+______________________________
+Computation time: 7.637004 min
