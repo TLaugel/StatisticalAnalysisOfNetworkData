@@ -12,7 +12,7 @@ import sys
 if len(list(sys.argv)) > 1 :
   maxDate = sys.argv[1]
 else :
-  maxDate = "2002-12-31"
+  maxDate = "2000-12-31"
 
 
 
@@ -89,11 +89,11 @@ print  time.time()-timestart
 #~ Wgt += Wgt NoiseWgt
 
 
-#~ ###Cleaning the covariance matrix
-#~ beta = 0  # NB :  the paper states that they used different values of beta for the diagonal and for the rest> to consider
-#~ Cov += beta * Cov.mean()
-#~ Wgt += beta * Wgt.mean()
-#~ Cov = numpy.divide(Cov,Wgt) #division term by term
+###Cleaning the covariance matrix
+beta = 0  # NB :  the paper states that they used different values of beta for the diagonal and for the rest> to consider
+Cov += beta * Cov.mean()
+Wgt += beta * Wgt.mean()
+Cov = numpy.divide(Cov,Wgt) #division term by term
 
 ###Ouput files : we save each matrix in a separate txt file
 #~ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'

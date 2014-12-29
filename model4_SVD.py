@@ -50,7 +50,7 @@ S = np.diag(s)
 
 print "Reconstructing the matrix"
 timestart =  time.time()
-res = np.dot(U,np.dot(S,V.transpose()))
+res = U.dot(S.dot(V.transpose()))
 print  time.time()-timestart 
 
 print "Saving the matrix"

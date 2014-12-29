@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 ##################################################
 # kNN algorithm starting from a covariance matrix
 #################################################
@@ -13,7 +14,8 @@ import sys
 import zipimport
 from sklearn.metrics import confusion_matrix
 import operator
-
+import math
+from sklearn.metrics import mean_squared_error
 
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
@@ -23,35 +25,52 @@ else :
 
 
 ###Input files : covariance matrix, list of movies, test data
-print timestart
+timestart =  time.time()
+#~ print timestart
 
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 if sys.platform == 'linux2':
 	path = '../'
-Covin = path+'CovMatrix_'+maxDate+'txt'
+Covin = path+'CovMatrix_'+maxDate+'.txt'
 Cov = numpy.loadtxt(Covin, delimiter = ',')
 print 'time to import Cov: '+ str((time.time()-timestart)/60)
-fin = path+'dbEffects'+date+'.txt'
+
+fin = path+'dbEffects'+maxDate+'.txt'
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
-ftest = path+'database_'+date+'_Test.txt'
-dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8")
+ftest = path+'database_'+maxDate+'_Test.txt.gz'
+#~ ftest = path+'test'
+dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8",compression = 'gzip')
+#~ dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8")
 dfTest = dfTest.head(100)
 print 'time to import Cov + Train and Test dataframes: '+ str((time.time()-timestart)/60)
 
 print 'hey ho let s go'
 ### kNN algorithm from covariance matrix
 listMovies = df.groupby('movieID')['movieID'].max().tolist()
+DicMovies = {}
+index = 0
+for el in listMovies :
+	DicMovies[el] = index
+	index += 1
 listUsers = df.groupby('userID')['userID'].max().tolist()
+DicUsers = {}
+index = 0
+for el in listUsers :
+	DicUsers[el] = index
+	index += 1
 
 def getNeighbors(moviesviewed, movietest, k): #k nearest neighbors among the movies that the user has already seen
     similarities = [] #list of tuples with (movies,similarity with movie)
+    i_movieTest = DicMovies[movietest]
     for movie2 in moviesviewed: #moviestrain is the list of movieIDs that the current user has viewed
-        if (movie2 != movietest and movietest in listMovies): #listmovies is the list of movies in the covariance matrix: has to be in it
-            similarities.append((movie2, Cov[listMovies.index(movietest),listMovies.index(movie2)]))
+        if (movie2 != movietest and movietest in DicMovies): #listmovies is the list of movies in the covariance matrix: has to be in it
+            similarities.append((movie2, Cov[i_movieTest,DicMovies[movie2]]))
     similarities.sort(key=operator.itemgetter(1), reverse=True)
-    neighbors = []
-    for x in range(min(k,len(similarities))):
-        neighbors.append(similarities[x][0])
+    n = min(k+1,len(similarities))
+    #~ neighbors = [0]*n
+    neighbors = [el[0] for el in similarities[0:n] ]
+    #~ for x in range(n):
+        #~ neighbors[x] = similarities[x][0]
     return neighbors
 
 def getRating(userviewed, neighbors): #we have a list of similar movies, now we have to derive the rating
@@ -59,16 +78,14 @@ def getRating(userviewed, neighbors): #we have a list of similar movies, now we 
     classVotes = {}
     for x in range(len(neighbors)):
         neighbor = neighbors[x] #scalar, it is the movieID of the neighbor
-        #on a une liste de films proches, mais quel rating attribue-t-on à ce film?
-                #1. majorité/moyenne des ratings (bad but ez)
-                #2. 
         rating = float(userviewed.ix[:,1][userviewed.ix[:,0]==neighbor]) #scalar
         if rating in classVotes:
             classVotes[rating] += 1
         else:
             classVotes[rating] = 1
-    sortedVotes = sorted(classVotes.iteritems(), key=operator.itemgetter(1), reverse=True)
-    return sortedVotes[0][0]
+    #~ sortedVotes = sorted(classVotes.iteritems(), key=operator.itemgetter(1), reverse=True)
+    #~ return sortedVotes[0][0]
+    return max(classVotes.iteritems(),key=operator.itemgetter(1))[0] #if I understand correctly you don't have to sort, you just take the max
 
 def accuracymeasures(predictions, dataTest):
     #1 remove NA and corresponding lines in dataTest
@@ -78,11 +95,9 @@ def accuracymeasures(predictions, dataTest):
     for x in range(len(predictions)):
         if predictions[x]=='NA':
             idx_remove.append(x)
-    for x in range(len(predictions)):
-        if x not in idx_remove:
+        else :
             predictions2.append(predictions[x])
             targets2.append(dataTest['rating'].tolist()[x])
-    
     #2 Accuracy measures: RMSE, accuracy percentage and confusion table
     #accuracy
     wellPred = 0
@@ -91,10 +106,11 @@ def accuracymeasures(predictions, dataTest):
             wellPred +=1
     acc = float(wellPred)/len(targets2)    
     #rmse
-    s = 0
-    for i in range(len(predictions2)):
-        s += (predictions2[i] - targets2[i])**2
-    rmse = math.sqrt(s/len(predictions2))    
+    #~ s = numpy.mean((predictions2 - targets2)**2)
+    #~ s = 0
+    #~ for i in range(len(predictions2)):
+        #~ s += (predictions2[i] - targets2[i])**2
+    rmse = math.sqrt(mean_squared_error(predictions2,targets2))    
     #ROC
     roc = confusion_matrix(targets2, predictions2)  
     print '______________________________'
@@ -116,7 +132,10 @@ def kNN(k):
         #print userlist
         #print '___'
         for user in userlist:
-            if user in listUsers:
+            if movie not in DicMovies : #movie we want to get the neighbors of has to be in the cov matrix
+                predictions.append('NA')
+                continue
+            if user in DicUsers:
                 #print 'user ok'
                 userviewed = df[df['userID']==user][['movieID','rating']]
                 moviesviewed = userviewed['movieID'].tolist()
@@ -125,18 +144,14 @@ def kNN(k):
                 userviewed = df.groupby('movieID')[['movieID', 'rating']].agg(['mean'])
                 userviewed = numpy.round(userviewed) #we want integer values
                 moviesviewed = userviewed['movieID']['mean'].tolist()
-            if movie in listMovies: #movie we want to get the neighbors of has to be in the cov matrix
-                #print 'movie known'
-                neighbors = getNeighbors(moviesviewed, movie, k) #list of closest movies he has viewed
-                result = int(getRating(userviewed, neighbors) ) #rating value
-            else:
-                #print 'movie unknown'
-                result = 'NA'
+            neighbors = getNeighbors(moviesviewed, movie, k) #list of closest movies he has viewed
+            result = int(getRating(userviewed, neighbors) ) #rating value
             predictions.append(result)
     return accuracymeasures(predictions,dfTest)
     #il faudra printer la table aussi après
     
 #k=3  RMSE=1.0 , acc = 27%
+print "Oh yeah baby"
 print kNN(20)
 
 print "Computation time: "+str((time.time()-timestart)/60)

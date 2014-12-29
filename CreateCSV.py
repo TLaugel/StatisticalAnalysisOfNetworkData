@@ -6,10 +6,10 @@ import gzip
 if len(list(sys.argv)) > 1 :
   maxDateStr = sys.argv[1]
 else :
-  maxDateStr = "2002-12-31"
+  maxDateStr = "2001-03-31"
   
 #~ maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
-print maxDateStr
+#~ print maxDateStr
 #to adapt
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download' #file where will be the output .txt : must be in a different file than the input .txt that we created with first python script
 #nameDir = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/subtraining_'+'-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)])  #file where the .txt files that we created with first script are
@@ -18,6 +18,7 @@ if sys.platform == 'linux2':
 	path = '..'
 
 nameDir = path+'/subtraining_'+maxDateStr
+nameDir = path+'/testing_'+maxDateStr
 	
 if __name__ == "__main__" :
     fout = gzip.open(path+'/database_'+maxDateStr+'.txt.gz','w')
