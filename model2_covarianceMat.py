@@ -75,7 +75,15 @@ print  time.time()-timestart
 ##No Noise for now ... (Memory issue)
 print "adding noise"
 sigma = .1
-Cov += numpy.random.normal(0,sigma,(nbMovies, nbMovies))
+noise = numpy.random.normal(0,sigma,(nbMovies, nbMovies))
+for i in range(nbMovies): #for having a symetrical noise, otherwise it would not make sense
+	for j in range(i,nbMovies):
+		noise[i,j] = noise[j,i]
+Cov += noise
+noise = numpy.random.normal(0,sigma,(nbMovies, nbMovies))
+for i in range(nbMovies): #for having a symetrical noise, otherwise it would not make sense
+	for j in range(i,nbMovies):
+		noise[i,j] = noise[j,i]
 Wgt += numpy.random.normal(0,sigma,(nbMovies, nbMovies))
 
 
