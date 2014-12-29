@@ -40,8 +40,9 @@ df = pandas.read_csv(fin,sep="\t",encoding="utf8")
 ftest = path+'database_'+maxDate+'_Test.txt.gz'
 #~ ftest = path+'test'
 dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8",compression = 'gzip')
-#~ dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8")
+print dfTest.shape
 dfTest = dfTest.head(100)
+#~ dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8")
 print 'time to import Cov + Train and Test dataframes: '+ str((time.time()-timestart)/60)
 
 print 'hey ho let s go'
@@ -66,9 +67,12 @@ def getNeighbors(moviesviewed, movietest, k): #k nearest neighbors among the mov
         if (movie2 != movietest and movietest in DicMovies): #listmovies is the list of movies in the covariance matrix: has to be in it
             similarities.append((movie2, Cov[i_movieTest,DicMovies[movie2]]))
     similarities.sort(key=operator.itemgetter(1), reverse=True)
-    n = min(k+1,len(similarities))
+    
+    #~ for x in range(min(k,len(similarities))):
+        #~ neighbors.append(similarities[x][0])
+    n = min(k,len(similarities))
+    neighbors = [el[0] for el in similarities[0:n]]
     #~ neighbors = [0]*n
-    neighbors = [el[0] for el in similarities[0:n] ]
     #~ for x in range(n):
         #~ neighbors[x] = similarities[x][0]
     return neighbors
@@ -152,6 +156,6 @@ def kNN(k):
     
 #k=3  RMSE=1.0 , acc = 27%
 print "Oh yeah baby"
-print kNN(20)
+kNN(20)
 
-print "Computation time: "+str((time.time()-timestart)/60)
+print "Computation time: %f min"%((time.time()-timestart)/60)
