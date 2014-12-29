@@ -28,22 +28,13 @@ df.drop(VarDel, axis=1, inplace=True)
 
 ###functions
 from scipy.sparse import csc_matrix as sparseM
-#rbarSerie : for a user, creates the matrix of size nbMovies^2 with M[i,j]=weight_user*rbar_user[i]*rbar_user[j]
 def rbarSerie(user):
     M = df.loc[df.index==user,["movieID", "centeredRating"]] #je prends films id et rating centered pour mon user /!\ df doit etre indexee seulement selon userID
     M = pandas.merge(moviesall,M, left_on='movieID', right_on='movieID', how='left') #left join on list of unique movies
-    #~ print M.shape
-    M = M["centeredRating"].fillna(0) #replace NaN from the left join by zeros and keep only centeredRating : this is now a Serie of size nbMovies
-    #~ M = M["centeredRating"].to_sparse(fill_value=0) #replace NaN from the left join by zeros and keep only centeredRating : this is now a Serie of size nbMovies
-    #~ M = M.as_matrix()#convert to an array then a matrix to get the transpose(not working for a 1 dimension vector with array format)
     
-    #~ M = numpy.asmatrix(M.as_matrix())#convert to an array then a matrix to get the transpose(not working for a 1 dimension vector with array format)
+    M = M["centeredRating"].fillna(0) #replace NaN from the left join by zeros and keep only centeredRating : this is now a Serie of size nbMovies
     M = sparseM(M)
     Mat = weight[user] * M.transpose().dot(M) #I think it was M*M.T in the paper, buuut our array are line and not 
-    #~ print Mat
-    #~ print Mat.shape
-    #~ print type(Mat)
-    #~ print type(Mat)
     return Mat #why don't you return Mat (it was M before, I assume it was a mistake)
 
 def onezeromat(matrix):
@@ -73,7 +64,6 @@ timestart =  time.time()
 df.set_index(['userID'], inplace = True) #small improvment : a bit faster...
 for user in pandas.Series(df.index.values.ravel()).unique():
 	rbarMatrix = rbarSerie(user) #matrix of size nbMovies^2 #weight[user] * rbar.T * rbar # matrix size nbMovies^2
-	#~ euMatrix = onezeromat(rbarMatrix.todense()) #idem with 1 instead of the ratings #weight[user] * eu.T * eu #idem
 	Cov += rbarMatrix.todense() #let's sum baby
 	Wgt += numpy.greater(rbarMatrix.todense(),0) #j'avais fait une connerie ici...
 	#~ i += 1
@@ -83,19 +73,21 @@ print  time.time()-timestart
 
 
 ##No Noise for now ... (Memory issue)
-#~ NoiseCov = numpy.asmatrix( numpy.zeros((nbMovies, nbMovies)))  #noise matrix
-#~ NoiseWgt = NoiseCov.copy()
-#~ Cov += NoiseCov
-#~ Wgt += Wgt NoiseWgt
+print "adding noise"
+sigma = .1
+Cov += numpy.random.normal(0,sigma,(nbMovies, nbMovies))
+Wgt += numpy.random.normal(0,sigma,(nbMovies, nbMovies))
 
 
 ###Cleaning the covariance matrix
+print "cleaning the covariance matrix"
 beta = 0  # NB :  the paper states that they used different values of beta for the diagonal and for the rest> to consider
 Cov += beta * Cov.mean()
 Wgt += beta * Wgt.mean()
 Cov = numpy.divide(Cov,Wgt) #division term by term
 
 ###Ouput files : we save each matrix in a separate txt file
+print "save the matrices"
 #~ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 foutCov = path+'CovMatrix_'+maxDate+'.txt'
 foutWgt = path+'WgtMatrix_'+maxDate+'.txt'

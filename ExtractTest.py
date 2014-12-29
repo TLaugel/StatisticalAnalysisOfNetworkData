@@ -7,7 +7,7 @@ liDates = []
 else :
     liDates = ["2000-0631"]
 """
-liDates = ["2001-03-31"]
+liDates = ["2001-01-31"]
 liDatesLi = [ el.split('-') for el in liDates]
 liDatesLiNum = [map(int,el) for el in liDatesLi]
 liDatesTrain =     ["2000-12-31"]

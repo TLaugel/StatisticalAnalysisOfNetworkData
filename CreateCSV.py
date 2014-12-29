@@ -6,7 +6,7 @@ import gzip
 if len(list(sys.argv)) > 1 :
   maxDateStr = sys.argv[1]
 else :
-  maxDateStr = "2001-03-31"
+  maxDateStr = "2001-01-31"
   
 #~ maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
 #~ print maxDateStr

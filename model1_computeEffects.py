@@ -44,8 +44,16 @@ GCnt = df.shape[0] + noise
 G = GSum/GCnt
 
 #####Movie effects
+sigma = .1
 noisemovies = [0]*nbMovies #Generate vectors of noise for each movie
-betam = 0 #number of fictitious ratings to introduce in the movie average calculation
+noisemovies = numpy.random.normal(0,sigma,nbMovies) #Generate vectors of noise for each movie
+betam = 15 #number of fictitious ratings to introduce in the movie average calculation
+
+#####User effects    
+betap = 20 #number of fictitious ratings to introduce in the user average calculation
+B = 1.0 #bound of the interval that clam the resulted centered rating, to limit sensitivity 
+# (???)
+
 
 MSum = df.groupby('movieID').sum()["rating"] + noisemovies
 MCnt = df.groupby('movieID').agg(['count'])["rating"] #agg() creates a dataframe instead of a Series like sum() > impossible to add vector noisemovies
@@ -57,10 +65,6 @@ Mavg.reset_index(inplace = True)
 Mavg.set_index(['movieID'])
 del MCnt,MSum
 
-#####User effects    
-betap = 0 #number of fictitious ratings to introduce in the user average calculation
-B = 2 #bound of the interval that clam the resulted centered rating, to limit sensitivity 
-# (???)
 
 UCnt = df.groupby('userID').agg(['count'])["rating"] #how many movies each user
 UCnt = UCnt.ix[:,0]

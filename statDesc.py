@@ -38,9 +38,48 @@ print "Now let's try Igraph"
 g = Graph.Read_Ncol(fin)
 #~ print g.vs["name"][1:10]
 #~ print g.es["weight"][1:10]
-g.vs["type"] = [int(name)%2 == 0 for name in g.vs["name"]]
-gcust, gmovie =  g.bipartite_projection(types='type')
-igraph.summary(g)
+g.vs["type"] = [int(name)%2 == 1 for name in g.vs["name"]]
 
-igraph.summary(gcust)
+gmovie =  g.bipartite_projection(types='type',which = 1)
+#~ gcust=  g.bipartite_projection(types='type',which = 0)
+#~ summary = igraph.summary(g,print_graph_attributes=True, print_vertex_attributes=True, print_edge_attributes=True)
+#~ print summary
+
+#~ igraph.summary(gcust)
 igraph.summary(gmovie)
+timestart =  time.time()
+print "diameter of the movie graph : %f" %gmovie.diameter()
+print "time to compute diameter %f sec" % int(time.time() - timestart)
+#~ timestart =  time.time()
+#~ print "clique number of the graph : %f " %gmovie.omega()
+#~ print "time to compute clique %d sec" % int(time.time() - timestart)
+timestart =  time.time()
+a = gmovie.degree_distribution()
+print a
+print "time to compute degree distribution %d sec" % int(time.time() - timestart)
+
+timestart =  time.time()
+gmovie.get_adjacency()
+print "time to compute adjacency matrix %d sec" % int(time.time() - timestart)
+
+timestart =  time.time()
+print "independence number of the movie graph : %f " %gmovie.alpha()
+print "time to compute independence number %d sec" % int(time.time() - timestart)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

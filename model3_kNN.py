@@ -41,7 +41,7 @@ ftest = path+'database_'+maxDate+'_Test.txt.gz'
 #~ ftest = path+'test'
 dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8",compression = 'gzip')
 print dfTest.shape
-dfTest = dfTest.head(100)
+#~ dfTest = dfTest.head(100)
 #~ dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8")
 print 'time to import Cov + Train and Test dataframes: '+ str((time.time()-timestart)/60)
 
