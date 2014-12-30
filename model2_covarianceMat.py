@@ -8,7 +8,7 @@ import time
 import sys
 import gzip
 import sys
-#maxdate of the previous file
+
 if len(list(sys.argv)) > 1 :
   sigma = float(sys.argv[1])
 else :
@@ -31,20 +31,15 @@ df.drop(VarDel, axis=1, inplace=True)
 ###functions
 from scipy.sparse import csc_matrix as sparseM
 def rbarSerie(user):
-    M = df.loc[df.index==user,["movieID", "centeredRating"]] #je prends films id et rating centered pour mon user /!\ df doit etre indexee seulement selon userID
+    M = df.loc[df.index==user,["movieID", "centeredRating"]] 
     M = pandas.merge(moviesall,M, left_on='movieID', right_on='movieID', how='left') #left join on list of unique movies
-    
     M = M["centeredRating"].fillna(0) #replace NaN from the left join by zeros and keep only centeredRating : this is now a Serie of size nbMovies
     M = sparseM(M)
-    Mat = weight[user] * M.transpose().dot(M) #I think it was M*M.T in the paper, buuut our array are line and not 
-    return Mat #why don't you return Mat (it was M before, I assume it was a mistake)
+    Mat = weight[user] * M.transpose().dot(M)
+    return Mat 
 
 def onezeromat(matrix):
     return numpy.asmatrix(numpy.where(matrix>0, 1, 0)) 
-
-#~ def onezeroAux(x):
-	#~ return int(x>0)
-#~ oneZero= numpy.vectorize(onezeroAux, otypes=[numpy.int])
 
 ####Parameters
 nbMovies = len(pandas.Series(df["movieID"].values.ravel()).unique())
@@ -63,27 +58,23 @@ i = 0
 import datetime
 import time
 timestart =  time.time()
-df.set_index(['userID'], inplace = True) #small improvment : a bit faster...
+df.set_index(['userID'], inplace = True) #index to speed-up the computation time
 for user in pandas.Series(df.index.values.ravel()).unique():
 	rbarMatrix = rbarSerie(user) #matrix of size nbMovies^2 #weight[user] * rbar.T * rbar # matrix size nbMovies^2
-	Cov += rbarMatrix.todense() #let's sum baby
-	Wgt += numpy.greater(rbarMatrix.todense(),0) #j'avais fait une connerie ici...
-	#~ i += 1
-	#~ if i > 1 :
-		#~ break
+	Cov += rbarMatrix.todense()
+	Wgt += numpy.greater(rbarMatrix.todense(),0) 
 print  time.time()-timestart 
 
 
 ##No Noise for now ... (Memory issue)
 print "adding noise"
-#~ sigma = .1
 noise = numpy.random.normal(0,sigma,(nbMovies, nbMovies))
-for i in range(nbMovies): #for having a symetrical noise, otherwise it would not make sense
+for i in range(nbMovies): #for having a symetrical noise : the covariance matrix must be symetrical
 	for j in range(i,nbMovies):
 		noise[i,j] = noise[j,i]
 Cov += noise
 noise = numpy.random.normal(0,sigma,(nbMovies, nbMovies))
-for i in range(nbMovies): #for having a symetrical noise, otherwise it would not make sense
+for i in range(nbMovies): #for having a symetrical noise : the covariance matrix must be symetrical
 	for j in range(i,nbMovies):
 		noise[i,j] = noise[j,i]
 Wgt += numpy.random.normal(0,sigma,(nbMovies, nbMovies))
@@ -98,8 +89,7 @@ Cov = numpy.divide(Cov,Wgt) #division term by term
 
 ###Ouput files : we save each matrix in a separate txt file
 print "save the matrices"
-#~ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 foutCov = path+'CovMatrix_'+maxDate+'_%f.txt' % sigma
-#~ foutWgt = path+'WgtMatrix_'+maxDate+'_%f.txt' % sigma
+#~ foutWgt = path+'WgtMatrix_'+maxDate+'_%f.txt' % sigma #we don't need to save it, it is useless for the next scripts
 numpy.savetxt(foutCov,Cov,delimiter=',')
 #~ numpy.savetxt(foutWgt,Wgt,delimiter=',')

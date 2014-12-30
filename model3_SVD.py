@@ -1,10 +1,6 @@
-##################################################
-# kNN algorithm starting from a covariance matrix
-#################################################
-
-# NB : still not running properly
-# NB2 : now : if a movie from the test dataset is not in the train dataset, 'NA' value is given
-
+####################################################
+# compute the SVD of the matrix and save a matrix of rank N (define in the script)
+####################################################
 import numpy as np
 import pandas
 import os
@@ -14,15 +10,15 @@ import gzip
 import sys
 import operator 
 
-#maxdate of the previous file
 if len(list(sys.argv)) > 1 :
   sigma = float(sys.argv[1])
 else :
   sigma = .1
 
 maxDate ="2000-12-31"
-###
-k = 1000
+### rank of the matrix return : lower rank approximation
+N = 1000
+
 ###Input files : covariance matrix, list of movies, test data
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 if sys.platform == 'linux2':
@@ -42,12 +38,11 @@ print "Decomposing SVD for sigma=%f" % sigma
 import datetime
 import time
 timestart =  time.time()
-U, s, V = np.linalg.svd(Cov,full_matrices=True) #about 2 minutess
+U, s, V = np.linalg.svd(Cov,full_matrices=True)
 print  time.time()-timestart 
 dim  = s.shape[0]
-s[(k+1):] = np.zeros(dim-k-1)
+s[(N +1):] = np.zeros(dim-N -1)
 S = np.diag(s)
-#~ print s
 
 print "Reconstructing the matrix"
 timestart =  time.time()
@@ -59,22 +54,5 @@ timestart =  time.time()
 compressMat = path+'compressMat_'+maxDate+'_%f.txt' % sigma
 np.savetxt(compressMat,res,delimiter=',')
 print  time.time()-timestart 
-
-
-
-#~ if sys.platform == 'linux2':
-	#~ import numpy as np
-	#~ import multiprocessing as mp
-	#~ def foo():
-		#~ return compressMat,np.dot(U,np.dot(S,V.transpose()))# this works fine
-
-	#~ def test():
-		#~ pool = mp.Pool(mp.cpu_count()) #this has an issue
-		#~ pool.map(foo, None)
-	
-	#~ print "Reconstructing the matrix"
-	#~ res2  = test()
-	#~ print res2.shape
-	#~ print  time.time()-timestart
 	
 	

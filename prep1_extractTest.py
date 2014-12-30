@@ -1,13 +1,12 @@
+################################
+#This script extract the test set, from the row data
+################################
 import os
 import time
 import sys
-liDates = []
-"""if len(list(sys.argv)) > 1 :
-    liDates = sys.argv[1:]
-else :
-    liDates = ["2000-0631"]
-"""
-liDates = ["2001-01-31"]
+
+#has not yet been improved to extract multiple test sets
+liDates = ["2000-01-31"]
 liDatesLi = [ el.split('-') for el in liDates]
 liDatesLiNum = [map(int,el) for el in liDatesLi]
 liDatesTrain =     ["2000-12-31"]
@@ -26,7 +25,7 @@ for maxDate in liDates :
     if not(os.path.exists(nameDir[maxDate] )):
         os.mkdir(nameDir[maxDate] )
 
-def isDateGreater_aux(li0,li1) :
+def isDateSmaller(li0,li1) : #li0 smaller or equal to li1
     if li0 == [] :
         return True
     el0 = li0[0]
@@ -35,10 +34,7 @@ def isDateGreater_aux(li0,li1) :
         return False
     if el0< el1 :
         return True
-    return isDateGreater_aux(li0[1:],li1[1:])
-
-
-
+    return isDateSmaller(li0[1:],li1[1:])
 
 if __name__ == "__main__" :
     for filename in os.listdir(path) :
@@ -48,15 +44,14 @@ if __name__ == "__main__" :
         for line in fin :
             parsed = line.split(',')
             currDateStr = parsed[-1].replace('\r','').replace('\n','')
-            liRevDate = map(int,currDateStr.split('-'))
+            liRevDate = map(int,currDateStr.split('-')) #the date of the review, in list form
             i = 0
             for maxDateLi in liDatesLi :
-                if (isDateGreater_aux(liRevDate,liDatesLiNum[i]) and isDateGreater_aux(liDatesLiNumTrain[i],liRevDate)):
+                if (isDateSmaller(liRevDate,liDatesLiNum[i]) and not isDateSmaller(liRevDate,liDatesLiNumTrain[i])):
                     if not liDates[i] in resDic :
                         resDic[ liDates[i] ] = open(nameDir[liDates[i]]+'/'+filename,'w')
                     resDic[liDates[i]].write(line)
                 i += 1
         fin.close()
-
         for maxDate in resDic :
                 resDic[maxDate].close()

@@ -1,3 +1,6 @@
+################################
+#Deprected : originally it was to plot fancy figures
+################################
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -14,9 +17,8 @@ for line in fin :
 		pass
 fin.close()
 
-#mouais on voit pas grand chose...
-#c'est pour ça que j'ai arrete la...
-#~ width = 0.35 
+#we can't see much, and as it is not the aim of our project,
+#we did'nt continue in this way
 p1 = plt.bar(range(len(d)-1), d[1:], color='r')
 plt.show()
 

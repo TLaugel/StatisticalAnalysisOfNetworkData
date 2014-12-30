@@ -1,11 +1,14 @@
+###################################
+#This script extract the training set, from the row data
+##################################
 import os
 import time
 import sys
 liDates = []
 if len(list(sys.argv)) > 1 :
-	liDates = sys.argv[1:]
+	liDates = sys.argv[1:] #if this script must be used for multiple dates, better to put them all as argument -> way faster
 else :
-	liDates = ["2002-12-31"]
+	liDates = ["2000-12-31"]
 
 liDatesLi = [ el.split('-') for el in liDates]
 liDatesLiNum = [map(int,el) for el in liDatesLi]
@@ -33,7 +36,6 @@ def isDateGreater_aux(li0,li1) :
 	return isDateGreater_aux(li0[1:],li1[1:])
 		
 if __name__ == "__main__" :
-	
 	for filename in os.listdir(path) :
 		fin = open('/'.join([path,filename]),'r')
 		fin.readline()
@@ -50,7 +52,6 @@ if __name__ == "__main__" :
 					resDic[liDates[i]].write(line)
 				i += 1
 		fin.close()
-		
 		for maxDate in resDic :
 				resDic[maxDate].close()
 		

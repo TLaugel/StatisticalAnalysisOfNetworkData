@@ -1,3 +1,7 @@
+##########################
+#Compute some properties of our graphs
+#based mainly on the i-graphs package
+##########################
 import os
 import time
 import sys
@@ -9,7 +13,6 @@ from igraph import Graph
 import pandas
 print("starting at "+strftime("%Y %m %d %H:%M:%S", gmtime()))
 
-#maxdate of the previous file
 if len(list(sys.argv)) > 1 :
   maxDateStr = sys.argv[1]
 else :
@@ -19,23 +22,19 @@ else :
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 if sys.platform == 'linux2':
 	path = '../'
-if not os.path.exists(path+"IgraphEdges") :
+if not os.path.exists(path+"IgraphEdges") : #igraphe require a specific input format
 	fin = open(path+'database_'+maxDateStr+'.txt.gz')
 	df = pandas.read_csv(fin,sep=",",encoding="utf8",compression = 'gzip')
 	df["userID"] *= 2
 	df["movieID"] *= 2
 	df["movieID"] += 1
 	df[["userID","movieID","rating"]].to_csv(path+"IgraphEdges",sep = "\t",encoding = "utf-8",header = False, index = False)
-	#~ print df.shape
 
 
 fin = path+"IgraphEdges"
 print "Now let's try Igraph"
-g = Graph.Read_Ncol(fin, directed=True,weights = True)
-
-#~ print g.vs["name"][1:10]
-#~ print g.es["weight"][1:10]
-g.vs["type"] = [int(name)%2 == 1 for name in g.vs["name"]]
+g = Graph.Read_Ncol(fin, directed=True,weights = True) #read the graph
+g.vs["type"] = [int(name)%2 == 1 for name in g.vs["name"]] #assign the movie or user type : 1 = movie
 igraph.summary(g)
 
 timestart =  time.time() ##Not enough RAM, as expected
@@ -82,7 +81,7 @@ print "time to compute degree distribution %d sec" % int(time.time() - timestart
 
 #~ timestart =  time.time() ##just for testing
 #~ gmovie.get_adjacency()
-#~ print "time to compute adjacency matrix %d sec" % int(time.time() - timestart)
+#~ print "time to compute adjacency matrix %d sec" % int(time.time() - timestart) #about 1 second !
 
 #~ timestart =  time.time() ##too much time to compute
 #~ print "independence number of the movie graph : %f " %gmovie.alpha()

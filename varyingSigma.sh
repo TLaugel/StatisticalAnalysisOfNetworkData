@@ -7,8 +7,8 @@ echo "Compute the covariance Matrices"
 ./applyScript.sh model2_covarianceMat.py sigmas
 date "+%Y-%m-%d %H:%M:%S"
 echo "Compute the SVD reduction"
-./applyScript.sh model4_SVD.py sigmas
+./applyScript.sh model3_SVD.py sigmas
 date "+%Y-%m-%d %H:%M:%S"
 echo "Compute the kNN"
-./applyScript.sh model3_kNN.py sigmas
+./applyScript.sh model4_kNN.py sigmas
 date "+%Y-%m-%d %H:%M:%S"
