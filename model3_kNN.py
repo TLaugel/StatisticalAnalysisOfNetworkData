@@ -88,12 +88,12 @@ def getRating(userviewed, neighbors): #we have a list of similar movies, now we 
             classVotes[rating] += 1
         else:
             classVotes[rating] = 1
-        res = 0
-        try : #not perfect but I don t see why it is needed...
+    res = 0
+    try : #not perfect but I don t see why it is needed...
             res = max(classVotes.iteritems(),key=operator.itemgetter(1))[0] #if I understand correctly you don't have to sort, you just take the max
-        except :
+    except :
             res = 3
-        return res
+    return res
 
 def accuracymeasures(predictions, dataTest):
     #1 remove NA and corresponding lines in dataTest
@@ -150,6 +150,7 @@ def kNN(k):
 def kNNbis(kList):
     predictions = {}
     res = {}
+    kmax = max(kList)
     #~ predictions = []
     for k in kList :
         predictions[k] = []
@@ -158,9 +159,7 @@ def kNNbis(kList):
         for user in userlist:
             if movie not in DicMovies : #movie we want to get the neighbors of has to be in the cov matrix
                 for k in kList :
-                    neighbors = getNeighbors(moviesviewed, movie, k) #list of closest movies he has viewed
-                    result = int(getRating(userviewed, neighbors) ) #rating value
-                    predictions[k].append(result)
+                    predictions[k].append('NA')
                 continue
             if user in DicUsers:
                 userviewed = df[df['userID']==user][['movieID','rating']]
@@ -169,21 +168,21 @@ def kNNbis(kList):
                 userviewed = df.groupby('movieID')[['movieID', 'rating']].agg(['mean'])
                 userviewed = numpy.round(userviewed) #we want integer values
                 moviesviewed = userviewed['movieID']['mean'].tolist()
+            neighbors = getNeighbors(moviesviewed, movie, kmax) #list of closest movies he has viewed, sorted by proximity anyway
             for k in kList :
-                neighbors = getNeighbors(moviesviewed, movie, k) #list of closest movies he has viewed
-                result = int(getRating(userviewed, neighbors) ) #rating value
+                result = int(getRating(userviewed, neighbors[0:k]) ) #rating value
                 predictions[k].append(result)
     for k in kList :
-        res[k] = accuracymeasures(predictions,dfTest)
+        res[k] = accuracymeasures(predictions[k],dfTest)
     return res
     #~ return accuracymeasures(predictions,dfTest)
 #k=3  RMSE=1.0 , acc = 27%
 print "Oh yeah baby"
-print kNN(20)
+res =kNNbis([1,5,10,15,20,25])
 #~ res = {}
 #~ for k in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 19, 20, 21, 25, 30] :
 	#~ print k
 	#~ res[k] = kNN(k)
-#~ import json
-#~ json.dumps(res)
+import json
+print json.dumps(res)
 print "Computation time: %f min"%((time.time()-timestart)/60)
