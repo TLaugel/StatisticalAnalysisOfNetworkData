@@ -16,10 +16,11 @@ import operator
 
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
-  maxDate = sys.argv[1]
+  sigma = float(sys.argv[1])
 else :
-  maxDate ="2000-12-31"
+  sigma = .1
 
+maxDate ="2000-12-31"
 ###
 k = 1000
 ###Input files : covariance matrix, list of movies, test data
@@ -27,17 +28,17 @@ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 if sys.platform == 'linux2':
 	path = '../'
 
-Covin = path+'CovMatrix_'+maxDate+'.txt'
+Covin = foutCov = path+'CovMatrix_'+maxDate+'_%f.txt' % sigma
 Cov = np.loadtxt(Covin, delimiter = ',')
 
-fin = path+'dbEffects'+maxDate+'.txt'
+fin = path+'dbEffects'+maxDate+'_%f.txt' % sigma
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
 
 listMovies = df.groupby('movieID')['movieID'].max().tolist()
 listUsers = df.groupby('userID')['userID'].max().tolist()
 
 
-print "Decomposing SVD"
+print "Decomposing SVD for sigma=%f" % sigma
 import datetime
 import time
 timestart =  time.time()
@@ -50,12 +51,12 @@ S = np.diag(s)
 
 print "Reconstructing the matrix"
 timestart =  time.time()
-res = U.dot(S.dot(V.transpose()))
+res = U.dot(S.dot(V.transpose())) #there is a faster way to reconstruct it : block matrix
 print  time.time()-timestart 
 
 print "Saving the matrix"
 timestart =  time.time()
-compressMat = path+'compressMat_'+maxDate+'.txt'
+compressMat = path+'compressMat_'+maxDate+'_%f.txt' % sigma
 np.savetxt(compressMat,res,delimiter=',')
 print  time.time()-timestart 
 

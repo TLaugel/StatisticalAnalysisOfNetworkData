@@ -10,17 +10,19 @@ import gzip
 import sys
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
-  maxDate = sys.argv[1]
+  sigma = float(sys.argv[1])
 else :
-  maxDate = "2000-12-31"
-
+  sigma = .1
+maxDate= "2000-12-31"
+maxDateStr= "2000-12-31"
 
 
 ####input is the output dataframe of the script model.py 
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 if sys.platform == 'linux2':
 	path = '../'
-fin = path+'dbEffects'+maxDate+'.txt'
+
+fin = path+'dbEffects'+maxDate+'_%f.txt' % sigma
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
 VarKept = ['movieID','userID','centeredRating']
 VarDel =  [el for el in df if not el in VarKept]
@@ -74,7 +76,7 @@ print  time.time()-timestart
 
 ##No Noise for now ... (Memory issue)
 print "adding noise"
-sigma = .1
+#~ sigma = .1
 noise = numpy.random.normal(0,sigma,(nbMovies, nbMovies))
 for i in range(nbMovies): #for having a symetrical noise, otherwise it would not make sense
 	for j in range(i,nbMovies):
@@ -97,7 +99,7 @@ Cov = numpy.divide(Cov,Wgt) #division term by term
 ###Ouput files : we save each matrix in a separate txt file
 print "save the matrices"
 #~ path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
-foutCov = path+'CovMatrix_'+maxDate+'.txt'
-foutWgt = path+'WgtMatrix_'+maxDate+'.txt'
+foutCov = path+'CovMatrix_'+maxDate+'_%f.txt' % sigma
+#~ foutWgt = path+'WgtMatrix_'+maxDate+'_%f.txt' % sigma
 numpy.savetxt(foutCov,Cov,delimiter=',')
-numpy.savetxt(foutWgt,Wgt,delimiter=',')
+#~ numpy.savetxt(foutWgt,Wgt,delimiter=',')

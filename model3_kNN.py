@@ -19,10 +19,10 @@ from sklearn.metrics import mean_squared_error
 
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
-  maxDate = sys.argv[1]
+  sigma = float(sys.argv[1])
 else :
-  maxDate ="2000-12-31"
-
+  sigma =.1
+maxDate ="2000-12-31"
 
 ###Input files : covariance matrix, list of movies, test data
 timestart =  time.time()
@@ -31,23 +31,26 @@ timestart =  time.time()
 path = 'C:/Users/Thibault/Desktop/ENSAE/Cours3A/Network Data/download/'
 if sys.platform == 'linux2':
 	path = '../'
-Covin = path+'compressMat_'+maxDate+'.txt'
+#~ Covin = path+'compressMat_'+maxDate+'.txt'
+Covin = path+'compressMat_'+maxDate+'_%f.txt' % sigma
 Cov = numpy.loadtxt(Covin, delimiter = ',')
 print 'time to import Cov: '+ str((time.time()-timestart)/60)
 
-fin = path+'dbEffects'+maxDate+'.txt'
+fin = path+'dbEffects'+maxDate+'_%f.txt' % sigma
 df = pandas.read_csv(fin,sep="\t",encoding="utf8")
-ftest = path+'database_'+maxDate+'_Test.txt.gz'
+#~ ftest = path+'database_'+maxDate+'_Test.txt.gz'
 #~ ftest = path+'testUsed_'+maxDate+'.txt.gz'
 #~ ftest = path+'test'
-dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8",compression = 'gzip')
+ftest = path+'db_test_random_10000.txt'
+#~ dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8",compression = 'gzip')
+dfTest = pandas.read_csv(ftest,sep="\t",encoding="utf8")
 #~ print dfTest.shape
 #~ dfTest = dfTest.head(10000)
 #~ dfTest.to_csv(path+'testUsed_'+maxDate+'.txt',sep=",",encoding="utf8")
 #~ dfTest = pandas.read_csv(ftest,sep=",",encoding="utf8")
 
 
-print 'time to import Cov + Train and Test dataframes: '+ str((time.time()-timestart)/60)
+print 'time to import Cov + Train and Test dataframes: %d min ' % ((time.time()-timestart)/60)
 
 print 'hey ho let s go'
 ### kNN algorithm from covariance matrix
@@ -121,6 +124,7 @@ def accuracymeasures(predictions, dataTest):
     print 'Confusion matrix:'
     print roc
     print '______________________________'
+    return rmse
 
 
 def kNN(k):
@@ -143,8 +147,43 @@ def kNN(k):
             predictions.append(result)
     return accuracymeasures(predictions,dfTest)
     
+def kNNbis(kList):
+    predictions = {}
+    res = {}
+    #~ predictions = []
+    for k in kList :
+        predictions[k] = []
+    for movie in (dfTest['movieID']).unique():
+        userlist = dfTest[dfTest['movieID']==movie]['userID'].tolist()
+        for user in userlist:
+            if movie not in DicMovies : #movie we want to get the neighbors of has to be in the cov matrix
+                for k in kList :
+                    neighbors = getNeighbors(moviesviewed, movie, k) #list of closest movies he has viewed
+                    result = int(getRating(userviewed, neighbors) ) #rating value
+                    predictions[k].append(result)
+                continue
+            if user in DicUsers:
+                userviewed = df[df['userID']==user][['movieID','rating']]
+                moviesviewed = userviewed['movieID'].tolist()
+            else :
+                userviewed = df.groupby('movieID')[['movieID', 'rating']].agg(['mean'])
+                userviewed = numpy.round(userviewed) #we want integer values
+                moviesviewed = userviewed['movieID']['mean'].tolist()
+            for k in kList :
+                neighbors = getNeighbors(moviesviewed, movie, k) #list of closest movies he has viewed
+                result = int(getRating(userviewed, neighbors) ) #rating value
+                predictions[k].append(result)
+    for k in kList :
+        res[k] = accuracymeasures(predictions,dfTest)
+    return res
+    #~ return accuracymeasures(predictions,dfTest)
 #k=3  RMSE=1.0 , acc = 27%
 print "Oh yeah baby"
-kNN(20)
-
+print kNN(20)
+#~ res = {}
+#~ for k in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 19, 20, 21, 25, 30] :
+	#~ print k
+	#~ res[k] = kNN(k)
+#~ import json
+#~ json.dumps(res)
 print "Computation time: %f min"%((time.time()-timestart)/60)

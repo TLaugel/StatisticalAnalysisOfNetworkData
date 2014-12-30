@@ -8,10 +8,10 @@ print("starting at "+strftime("%Y %m %d %H:%M:%S", gmtime()))
 
 #maxdate of the previous file
 if len(list(sys.argv)) > 1 :
-  maxDateStr = sys.argv[1]
+  sigma = float(sys.argv[1])
 else :
-  maxDateStr = "2000-12-31"
-  
+  sigma = .1
+maxDateStr = "2000-12-31"
 #~ maxDateStr = '-'.join([str(maxDate.tm_year),str(maxDate.tm_mon),str(maxDate.tm_mday)]) 
 import pandas, numpy
 
@@ -44,8 +44,8 @@ GCnt = df.shape[0] + noise
 G = GSum/GCnt
 
 #####Movie effects
-sigma = .1
-noisemovies = [0]*nbMovies #Generate vectors of noise for each movie
+#~ sigma = .1
+#~ noisemovies = [0]*nbMovies #Generate vectors of noise for each movie
 noisemovies = numpy.random.normal(0,sigma,nbMovies) #Generate vectors of noise for each movie
 betam = 15 #number of fictitious ratings to introduce in the movie average calculation
 
@@ -89,7 +89,7 @@ df.set_index(['userID','movieID'])
 
 ###Export database with rhat : 
 print "Export the data "+strftime("%Y %m %d %H:%M:%S", gmtime())
-fout = path+'dbEffects'+maxDateStr+'.txt'
+fout = path+'dbEffects'+maxDateStr+'_%f.txt' % sigma
 df.to_csv(fout, sep='\t', encoding='utf-8')
 print "Ended at "+strftime("%Y %m %d %H:%M:%S", gmtime())
 
