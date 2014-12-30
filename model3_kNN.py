@@ -178,11 +178,12 @@ def kNNbis(kList):
     #~ return accuracymeasures(predictions,dfTest)
 #k=3  RMSE=1.0 , acc = 27%
 print "Oh yeah baby"
-res =kNNbis([1,5,10,15,20,25])
+print kNN(20)
+#~ res =kNNbis([1,5,10,15,20,25])
 #~ res = {}
 #~ for k in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 19, 20, 21, 25, 30] :
 	#~ print k
 	#~ res[k] = kNN(k)
-import json
-print json.dumps(res)
+#~ import json
+#~ print json.dumps(res)
 print "Computation time: %f min"%((time.time()-timestart)/60)
