@@ -26,4 +26,3 @@ Other files:
 - res0_countMoviesUsersReviews.py: count number of users and movies
 - res1_statDesc.py: compute some properties of our graph
 - res2_plotDegDistr.py: degree distribution
-- 
